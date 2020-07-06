@@ -1,0 +1,54 @@
+%{ 
+open AbstractSyntaxTree 
+%} 
+ 
+%start File
+ 
+// terminal tokens
+%token <decimal> NUMBER
+%token <string> SYMBOL
+%token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL
+%token EOF
+%token INDENT
+%token OUTDENT
+%token MODULE
+%token LET
+%token RETURN
+
+// associativity and precedences
+%left PLUS MINUS 
+%left TIMES DIVIDE
+ 
+// return type of Expr
+%type <File> File
+%type <string> Module
+%type <Statement list> Statements
+%type <Statement> Statement
+%type <Statement> LetStatement
+%type <Statement> ReturnStatement
+
+%type <Expression> Expression
+ 
+%% 
+
+File: MODULE SYMBOL Statements EOF { Module ($2, $3) }
+
+Module: MODULE SYMBOL { $2 }
+
+Statements: Statement Statements { $1 :: $2 }
+          | { List.empty }
+
+Statement: LetStatement { $1 }
+         | ReturnStatement { $1 }
+
+LetStatement: LET SYMBOL EQUAL Statements { Let ($2, $4) }
+
+ReturnStatement: Expression { Return $1 }
+
+Expression: NUMBER { Number $1 }
+          | SYMBOL                  { Symbol $1 }
+          | Expression PLUS Expression          { Function (Plus, $1, $3) } 
+          | Expression MINUS Expression         { Function (Minus, $1, $3) } 
+          | Expression TIMES Expression         { Function (Times, $1, $3) } 
+          | Expression DIVIDE Expression        { Function (Divide, $1, $3) }
+          | LPAREN Expression RPAREN      { $2 }

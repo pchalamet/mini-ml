@@ -1,0 +1,34 @@
+{
+// module Lexer
+
+open Parser  // we need the terminal tokens from the Parser
+open FSharp.Text.Lexing
+ 
+let lexeme = LexBuffer<_>.LexemeString
+}
+
+let module = "module"
+let return = "return"
+let symbol = ['a'-'z']+
+let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
+let olet    = "let"
+let whitespace = ' ' | '\t'
+let newline    = '\n' | '\r' '\n'
+
+rule token = parse
+    | module     { MODULE }
+    | olet        { LET }
+    | return     { RETURN }
+    | number     { NUMBER (lexeme lexbuf |> decimal) }
+    | symbol     { SYMBOL (lexeme lexbuf |> string) }
+    | '='        { EQUAL }
+    | '+'        { PLUS }
+    | '-'        { MINUS }
+    | '*'        { TIMES }
+    | '/'        { DIVIDE }
+    | '('        { LPAREN }
+    | ')'        { RPAREN }
+    | whitespace { token lexbuf }
+    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof        { EOF }
+    | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
