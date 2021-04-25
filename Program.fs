@@ -2,8 +2,6 @@
 
 open AbstractSyntaxTree
 
-// open Expr.Lexer
-// open Expr.Parser 
 open FSharp.Text.Lexing
 open System.IO
 
