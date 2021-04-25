@@ -52,3 +52,4 @@ Expression: NUMBER { Number $1 }
           | Expression TIMES Expression         { Function (Times, $1, $3) } 
           | Expression DIVIDE Expression        { Function (Divide, $1, $3) }
           | LPAREN Expression RPAREN      { $2 }
+
