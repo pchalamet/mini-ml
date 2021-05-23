@@ -63,8 +63,10 @@ let lexFilter (lexbuf: LexBuffer<char>) =
                                                           currToken
                    | Parser.token.EOF, _, _ -> popGuide() |> ignore
                                                match guideStack with
-                                               | [] -> currToken
-                                               | _ -> // printfn "EOF guide = %A" guideStack       
+                                               | [] -> lexbuf.IsPastEndOfStream <- true
+                                                       currToken
+                                               | _ -> // printfn "EOF guide = %A" guideStack
+                                                      lexbuf.IsPastEndOfStream <- false
                                                       pushToken (Parser.token.EOF, 0, currRow)
                                                       Parser.token.BLOCKEND
                    | _ -> match guideStack with
