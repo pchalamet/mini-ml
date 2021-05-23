@@ -1,24 +1,16 @@
 ﻿module Main
 
-open AbstractSyntaxTree
-
 open FSharp.Text.Lexing
 open System.IO
 
-let debugToken lexbuf =
-    let res = Lexer.token lexbuf
-    printfn "token: %A" res
-    res
-
 let parse txt =
-  txt
-  |> LexBuffer<_>.FromString
-  |> Parser.File debugToken
+    let lexbuf = LexBuffer<_>.FromString txt
+    Parser.File LexFilter.lexFilter lexbuf
  
 
 [<EntryPoint>]
 let main argv =
-    let content = File.ReadAllText ("Samples/Test2.mfs")
+    let content = File.ReadAllText ("Samples/Test1.mfs")
     let ast = content |> parse
     ast |> printfn "%A"
 

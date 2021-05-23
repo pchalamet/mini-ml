@@ -4,8 +4,10 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AbstractSyntaxTree.fs" />
+
     <FsYacc Include="Parser.fsy">
-        <OtherFlags>--module Parser</OtherFlags>
+        <OtherFlags>-v --module Parser</OtherFlags>
     </FsYacc>
     <FsLex Include="Lexer.fsl">
         <OtherFlags>--module Lexer --unicode</OtherFlags>
@@ -15,10 +17,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
-    <Compile Include="AbstractSyntaxTree.fs" />
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
+    <Compile Include="LexFilter.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

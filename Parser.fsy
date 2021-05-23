@@ -1,6 +1,14 @@
 %{ 
-open AbstractSyntaxTree 
-%} 
+open AbstractSyntaxTree
+
+
+#if DEBUG
+let debugPrint s = printfn "### %s" s
+#else
+let debugPrint s = ignore s
+#endif
+
+%}
  
 %start File
  
@@ -9,43 +17,51 @@ open AbstractSyntaxTree
 %token <string> SYMBOL
 %token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL
 %token EOF
-%token INDENT
-%token OUTDENT
+
 %token MODULE
 %token LET
+%token BIND
 %token RETURN
+
+%token BLOCKSEP
+%token BLOCKBEGIN
+%token BLOCKEND
 
 // associativity and precedences
 %left PLUS MINUS 
 %left TIMES DIVIDE
- 
+
 // return type of Expr
-%type <File> File
+%type <AbstractSyntaxTree.File> File
 %type <string> Module
 %type <Statement list> Statements
 %type <Statement> Statement
 %type <Statement> LetStatement
 %type <Statement> ReturnStatement
-
 %type <Expression> Expression
- 
+
 %% 
 
-File: MODULE SYMBOL Statements EOF { Module ($2, $3) }
+File: Module BLOCKSEP
+      Statements
+      EOF { Module ($1, $3) }
 
 Module: MODULE SYMBOL { $2 }
 
-Statements: Statement Statements { $1 :: $2 }
-          | { List.empty }
+Statements: Statement { debugPrint $"Statement1 {$1}" ; [ $1 ] }
+          | Statements BLOCKSEP Statement { debugPrint $"Statement2  {$1}  {$3}" ; $1 @ [ $3 ] }
 
 Statement: LetStatement { $1 }
          | ReturnStatement { $1 }
 
-LetStatement: LET SYMBOL EQUAL Statements { Let ($2, $4) }
+LetStatement: LET SYMBOL BIND 
+              BLOCKBEGIN
+                Statements 
+              BLOCKEND { Let ($2, $5) }
 
 ReturnStatement: Expression { Return $1 }
 
-Expression: NUMBER { Number $1 }
+Expression: NUMBER                  { Number $1 }
           | SYMBOL                  { Symbol $1 }
           | Expression PLUS Expression          { Function (Plus, $1, $3) } 
           | Expression MINUS Expression         { Function (Minus, $1, $3) } 

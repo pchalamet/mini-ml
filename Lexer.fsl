@@ -17,11 +17,12 @@ let newline    = '\n' | '\r' '\n'
 
 rule token = parse
     | module     { MODULE }
-    | olet        { LET }
+    | olet       { LET }
     | return     { RETURN }
     | number     { NUMBER (lexeme lexbuf |> decimal) }
     | symbol     { SYMBOL (lexeme lexbuf |> string) }
-    | '='        { EQUAL }
+    | "=="       { EQUAL }
+    | '='        { BIND }
     | '+'        { PLUS }
     | '-'        { MINUS }
     | '*'        { TIMES }
