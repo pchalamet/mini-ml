@@ -1,88 +1,63 @@
 module LexFilter
 open FSharp.Text.Lexing
 
-let mutable guideStack: (int * int) list = [ 0, 0 ]
+type LexFilter() = class end
+with
+    let mutable prevToken = Parser.token.DUMMY
+    let mutable prevPosition = Position.Empty
+    let mutable delayedTokens = [ Parser.token.BLOCKBEGIN, Position.Empty ]
+    let mutable blockStack = [ Position.Empty ]
+    let mutable isEOF = false
 
-let guide() = guideStack.Head
+    member _.NextToken (lexbuf: LexBuffer<char>) =
 
-let guideCol() = guideStack.Head |> fst
+        let getToken() =
+            match delayedTokens with
+            | (token, position) :: tail -> delayedTokens <- tail
+                                           token, position
+            | _ -> Lexer.token lexbuf, lexbuf.StartPos
 
-let tryGuide() =
-    guideStack |> List.tryHead
+        let isPastEndOfStream = lexbuf.IsPastEndOfStream
+        let nextToken, nextTokenStart = getToken()
 
-let pushGuide guide =
-    // printfn "Pushing guide %d" guide
-    guideStack <- guide :: guideStack
+        let unput replacementToken =
+            delayedTokens <- (nextToken, nextTokenStart) :: delayedTokens
+            lexbuf.IsPastEndOfStream <- isPastEndOfStream
+            replacementToken
 
-let popGuide() = 
-    match guideStack with
-    | head :: tail -> guideStack <- tail
-                    //   printfn "Poping guide %d" head
-                      head
-    | _ -> failwith "no guide available"
+        let pushBlock position =
+            blockStack <- position :: blockStack
 
+        let popBlock () =
+            match blockStack with
+            | head :: tail -> blockStack <- tail
+                              Some head
+            | _ -> None
 
-let mutable tokenStack: (Parser.token * int * int) list = List.empty 
+        isEOF <- nextToken = Parser.token.EOF
+        let token = if isEOF then
+                        match popBlock() with
+                        | None -> Parser.token.EOF
+                        | Some _ -> unput Parser.token.BLOCKEND
+                    else
+                        let startBlockMarkers = Set [ Parser.token.BIND; Parser.token.THEN; Parser.token.ELSE]
+                        if startBlockMarkers |> Set.contains prevToken then
+                            if prevPosition.Column < nextTokenStart.Column then
+                                blockStack <- nextTokenStart :: blockStack
+                                unput Parser.token.BLOCKBEGIN
+                            else
+                                failwith "Indentation error"
+                        else
+                            let block = blockStack.Head
+                            if block.Column = nextTokenStart.Column && block.Line <> nextTokenStart.Line then
+                                blockStack <- nextTokenStart :: blockStack.Tail
+                                unput Parser.token.BLOCKSEP
+                            elif nextTokenStart.Column < block.Column then
+                                blockStack <- blockStack.Tail
+                                unput Parser.token.BLOCKEND
+                            else
+                                nextToken
 
-let pushToken token =
-    // printfn "Pushing token %A" token
-    tokenStack <- token :: tokenStack
-
-let popToken() = 
-    match tokenStack with
-    | head :: tail -> tokenStack <- tail
-                    //   printfn "Poping token %A" head
-                      head
-    | _ -> failwith "no token available"
-
-
-let getToken (lexbuf: LexBuffer<char>) =
-    Lexer.token lexbuf, lexbuf.StartPos.Column, lexbuf.StartPos.Line
-
-let lexFilter (lexbuf: LexBuffer<char>) =
-    // printfn "*** lexFilter"
-    let currToken, currCol, currRow = if tokenStack |> List.isEmpty |> not then popToken()
-                                      else
-                                          let currToken, currTokenCol, currTokenRow = getToken lexbuf
-                                          //    printfn "token %A (%d, %d)" currToken currTokenCol currTokenRow
-                                          match currToken with
-                                          | Parser.token.BIND -> let nextToken, nextTokenCol, nextTokenRow = getToken lexbuf
-                                                               //   printfn "next token %A (%d, %d)" nextToken nextTokenCol nextTokenRow
-                                                                 if guideCol() < nextTokenCol then
-                                                                     pushToken (nextToken, nextTokenCol, nextTokenRow)
-                                                                     pushToken (Parser.token.BLOCKBEGIN, nextTokenCol, nextTokenRow)
-                                                                 else
-                                                                     failwith "Indentation error"
-                                          | Parser.token.EOF -> // printfn "Generating EOF %A" tokenStack
-                                                                pushToken (Parser.token.EOF, 0, currTokenCol)
-                                          | _ -> ()
-                                          currToken, currTokenCol, currTokenRow
-
-    let retToken = match currToken, currCol, currRow with
-                   | Parser.token.BLOCKBEGIN, col, row -> pushGuide (col, row)
-                                                          currToken
-                   | Parser.token.EOF, _, _ -> popGuide() |> ignore
-                                               match guideStack with
-                                               | [] -> lexbuf.IsPastEndOfStream <- true
-                                                       currToken
-                                               | _ -> // printfn "EOF guide = %A" guideStack
-                                                      lexbuf.IsPastEndOfStream <- false
-                                                      pushToken (Parser.token.EOF, 0, currRow)
-                                                      Parser.token.BLOCKEND
-                   | _ -> match guideStack with
-                          | (col, row) :: _ -> if col = guideCol() && row <> currRow then
-                                                   popGuide() |> ignore
-                                                   pushGuide (currCol, currRow)
-                                                   pushToken (currToken, currCol, currRow)
-                                                   Parser.token.BLOCKSEP
-                                               elif currCol < guideCol() then
-                                                   popGuide() |> ignore
-                                                   pushToken (currToken, currCol, currRow)
-                                                   Parser.token.BLOCKEND
-                                               else
-                                                   currToken
-                          | _ -> currToken
-
-    printfn ">>> token: %A" retToken
-    retToken
- 
+        prevToken <- token
+        printfn "Token = %A" token
+        token

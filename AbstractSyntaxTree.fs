@@ -5,6 +5,15 @@ type Function =
     | Minus
     | Times
     | Divide
+    | Equal
+    | NotEqual
+    | LowerThan
+    | LowerThanOrEqual
+    | GreaterThan
+    | GreaterThanOrEqual
+    | And
+    | Or
+    | Not
 
 type Expression = 
     | Number of decimal
@@ -14,6 +23,7 @@ type Expression =
 type Statement =
     | Return of Expression
     | Let of string * Statements
+    | IfThenElse of Expression * Statements * Statements
 and Statements = Statement list
 
 type File =

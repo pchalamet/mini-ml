@@ -5,8 +5,9 @@ open System.IO
 
 let parse txt =
     let lexbuf = LexBuffer<_>.FromString txt
-    Parser.File LexFilter.lexFilter lexbuf
- 
+    let lexFilter = LexFilter.LexFilter()
+    Parser.File lexFilter.NextToken lexbuf
+
 
 [<EntryPoint>]
 let main argv =

@@ -12,10 +12,13 @@ let debugPrint s = ignore s
  
 %start File
  
+%token DUMMY
+
 // terminal tokens
 %token <decimal> NUMBER
 %token <string> SYMBOL
-%token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL
+%token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
+%token AND OR
 %token EOF
 
 %token MODULE
@@ -23,13 +26,17 @@ let debugPrint s = ignore s
 %token BIND
 %token RETURN
 
+%token IF THEN ELSE
+
 %token BLOCKSEP
 %token BLOCKBEGIN
 %token BLOCKEND
 
 // associativity and precedences
+%left AND OR
 %left PLUS MINUS 
 %left TIMES DIVIDE
+%left EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
 
 // return type of Expr
 %type <AbstractSyntaxTree.File> File
@@ -42,9 +49,11 @@ let debugPrint s = ignore s
 
 %% 
 
-File: Module BLOCKSEP
-      Statements
-      EOF { Module ($1, $3) }
+File: BLOCKBEGIN 
+        Module BLOCKSEP
+        Statements
+      BLOCKEND
+      EOF { Module ($2, $4) }
 
 Module: MODULE SYMBOL { $2 }
 
@@ -53,13 +62,15 @@ Statements: Statement { debugPrint $"Statement1 {$1}" ; [ $1 ] }
 
 Statement: LetStatement { $1 }
          | ReturnStatement { $1 }
+         | IfThenElseStatement { $1 }
 
-LetStatement: LET SYMBOL BIND 
-              BLOCKBEGIN
-                Statements 
-              BLOCKEND { Let ($2, $5) }
+LetStatement: LET SYMBOL BIND BLOCKBEGIN Statements BLOCKEND { Let ($2, $5) }
 
 ReturnStatement: Expression { Return $1 }
+
+IfThenElseStatement: IF Expression THEN BLOCKBEGIN Statements BLOCKEND { IfThenElse ($2, $5, []) }
+                   | IF Expression THEN BLOCKBEGIN Statements BLOCKEND 
+                     BLOCKSEP ELSE BLOCKBEGIN Statements BLOCKEND { IfThenElse ($2, $5, $10) }
 
 Expression: NUMBER                  { Number $1 }
           | SYMBOL                  { Symbol $1 }
@@ -67,5 +78,16 @@ Expression: NUMBER                  { Number $1 }
           | Expression MINUS Expression         { Function (Minus, $1, $3) } 
           | Expression TIMES Expression         { Function (Times, $1, $3) } 
           | Expression DIVIDE Expression        { Function (Divide, $1, $3) }
+
+          | Expression EQUAL Expression        { Function (Equal, $1, $3) }
+          | Expression NOT_EQUAL Expression        { Function (NotEqual, $1, $3) }
+          | Expression LT Expression        { Function (LowerThan, $1, $3) }
+          | Expression LT_EQUAL Expression        { Function (LowerThanOrEqual, $1, $3) }
+          | Expression GT Expression        { Function (GreaterThan, $1, $3) }
+          | Expression GT_EQUAL Expression        { Function (GreaterThanOrEqual, $1, $3) }
+
+          | Expression AND Expression        { Function (And, $1, $3) }
+          | Expression OR Expression        { Function (Or, $1, $3) }
+
           | LPAREN Expression RPAREN      { $2 }
 

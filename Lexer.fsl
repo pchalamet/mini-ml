@@ -11,17 +11,26 @@ let module = "module"
 let return = "return"
 let symbol = ['a'-'z']+
 let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
-let olet    = "let"
 let whitespace = ' ' | '\t'
 let newline    = '\n' | '\r' '\n'
 
 rule token = parse
     | module     { MODULE }
-    | olet       { LET }
+    | "let"      { LET }
+    | "if"       { IF }
+    | "then"     { THEN }
+    | "else"     { ELSE }
     | return     { RETURN }
     | number     { NUMBER (lexeme lexbuf |> decimal) }
     | symbol     { SYMBOL (lexeme lexbuf |> string) }
     | "=="       { EQUAL }
+    | "<>"       { NOT_EQUAL }
+    | '<'        { LT }
+    | '>'        { GT }
+    | "<="       { LT_EQUAL }
+    | ">="       { GT_EQUAL }  
+    | "&&"       { AND }
+    | "||"       { OR }
     | '='        { BIND }
     | '+'        { PLUS }
     | '-'        { MINUS }

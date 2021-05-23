@@ -1,4 +1,7 @@
 module toto 
 
 let a = 42
-666
+if a == 10 then
+    if b == 11 then 42 
+else 10
+
