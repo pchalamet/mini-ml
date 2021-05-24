@@ -1,0 +1,8 @@
+module toto
+
+let a = 
+    let c = 
+        let d = 666
+        let e = 42
+    let d = 123
+let e = 33

@@ -1,0 +1,5 @@
+module toto 
+let a = 
+   42
+let b = 
+  666

@@ -1,0 +1,44 @@
+{
+// module Lexer
+
+open MiniML.Parser  // we need the terminal tokens from the Parser
+open FSharp.Text.Lexing
+ 
+let lexeme = LexBuffer<_>.LexemeString
+}
+
+let module = "module"
+let return = "return"
+let symbol = ['a'-'z']+
+let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
+let whitespace = ' ' | '\t'
+let newline    = '\n' | '\r' '\n'
+
+rule token = parse
+    | module     { MODULE }
+    | "let"      { LET }
+    | "if"       { IF }
+    | "then"     { THEN }
+    | "else"     { ELSE }
+    | return     { RETURN }
+    | number     { NUMBER (lexeme lexbuf |> decimal) }
+    | symbol     { SYMBOL (lexeme lexbuf |> string) }
+    | "=="       { EQUAL }
+    | "<>"       { NOT_EQUAL }
+    | '<'        { LT }
+    | '>'        { GT }
+    | "<="       { LT_EQUAL }
+    | ">="       { GT_EQUAL }  
+    | "&&"       { AND }
+    | "||"       { OR }
+    | '='        { BIND }
+    | '+'        { PLUS }
+    | '-'        { MINUS }
+    | '*'        { TIMES }
+    | '/'        { DIVIDE }
+    | '('        { LPAREN }
+    | ')'        { RPAREN }
+    | whitespace { token lexbuf }
+    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+    | eof        { EOF }
+    | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
