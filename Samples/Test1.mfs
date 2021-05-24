@@ -1,5 +1,3 @@
-module toto 
-let a = 
-   42
-let b = 
-  666
+module toto
+if a == 10 then a (a()) 3
+

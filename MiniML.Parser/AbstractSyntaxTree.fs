@@ -19,6 +19,8 @@ type Expression =
     | Number of decimal
     | Symbol of string
     | Function of Function * Expression * Expression
+    | FunctionCall of string * (Expression list)
+    | PartialFunctionCall of string * (Expression list)
 
 type Statement =
     | Return of Expression

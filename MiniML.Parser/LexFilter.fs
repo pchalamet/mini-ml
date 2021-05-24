@@ -7,6 +7,9 @@ open MiniML.Lexer
 type ParseException(message, position: Position) =
     inherit System.Exception($"Parsing error: {message} ({position.Column}, {position.Line})")
 
+let startBlockMarkers = Set [ Parser.token.BIND
+                              Parser.token.THEN
+                              Parser.token.ELSE ]
 
 type LexFilter() = class end
 with
@@ -47,7 +50,6 @@ with
                         | Some _ -> unput Parser.token.BLOCKEND
                     else
                         // Here we start a block (BIND, THEN ELSE...) - just ensure next token is after current block column
-                        let startBlockMarkers = Set [ Parser.token.BIND; Parser.token.THEN; Parser.token.ELSE ]
                         if startBlockMarkers |> Set.contains prevToken then
                             if nextTokenStart.Column <= blocks.Head.Column then ParseException("Indentation error", nextTokenStart) |> raise
                             blocks <- nextTokenStart :: blocks

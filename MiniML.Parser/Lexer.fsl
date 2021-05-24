@@ -38,6 +38,8 @@ rule token = parse
     | '/'        { DIVIDE }
     | '('        { LPAREN }
     | ')'        { RPAREN }
+    | ','        { COMMA }
+    | ';'        { SEMICOLON }
     | whitespace { token lexbuf }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof        { EOF }

@@ -6,7 +6,7 @@
     <Compile Include="AbstractSyntaxTree.fs" />
 
     <FsYacc Include="Parser.fsy">
-        <OtherFlags>--module MiniML.Parser</OtherFlags>
+        <OtherFlags>-v --module MiniML.Parser</OtherFlags>
     </FsYacc>
     <FsLex Include="Lexer.fsl">
         <OtherFlags>--module MiniML.Lexer --unicode</OtherFlags>
