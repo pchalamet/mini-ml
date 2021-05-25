@@ -4,6 +4,13 @@ open MiniML
 open MiniML.Lexer
 
 
+[<RequireQualifiedAccess>]
+type BlockKind =
+    | Statements of Position
+    | Let of Position
+    | If of Position
+    | Match of Position
+
 type ParseException(message, position: Position) =
     inherit System.Exception($"Parsing error: {message} ({position.Column}, {position.Line})")
 
@@ -14,9 +21,9 @@ let startBlockMarkers = Set [ Parser.token.BIND
 
 type LexFilter() = class end
 with
-    let mutable prevToken = Parser.token.DUMMY
+    let mutable prevToken = Parser.token.BOF
     let mutable delayedTokens = [ Parser.token.BLOCKBEGIN, Position.Empty ]
-    let mutable blocks = [ Position.Empty ]
+    let mutable blocks = [ BlockKind.Statements Position.Empty ]
     let mutable isEOF = false
 
     member _.NextToken (lexbuf: LexBuffer<char>) =
@@ -39,16 +46,15 @@ with
             blocks <- position :: blocks
 
         let popBlock () =
-            match blocks with
-            | head :: tail -> blocks <- tail
-                              Some head
-            | _ -> None
+            let block = blocks.Head
+            blocks <- blocks.Tail
+            block
 
         isEOF <- nextToken = Parser.token.EOF
         let token = if isEOF then
                         match popBlock() with
-                        | None -> Parser.token.EOF
-                        | Some _ -> unput Parser.token.BLOCKEND
+                        | BlockKind.BeginOfFile -> Parser.token.EOF
+                        | _ -> unput Parser.token.BLOCKEND
                     else
                         // Here we start a block (BIND, THEN ELSE...) - just ensure next token is after current block column
                         if startBlockMarkers |> Set.contains prevToken then

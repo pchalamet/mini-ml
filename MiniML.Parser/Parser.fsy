@@ -12,7 +12,7 @@ let debugPrint s = ignore s
  
 %start File
  
-%token DUMMY
+%token BOF EOF
 
 // terminal tokens
 %token COMMA SEMICOLON
@@ -20,19 +20,13 @@ let debugPrint s = ignore s
 %token <string> SYMBOL
 %token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
 %token AND OR
-%token EOF
 
 %token MODULE
-%token LET
-%token BIND
-%token RETURN
+%token BLOCKSEP BLOCKBEGIN BLOCKEND
 
-%token IF THEN ELSE
-%token MATCH WITH PIPE FAT_ARROW
-
-%token BLOCKSEP
-%token BLOCKBEGIN
-%token BLOCKEND
+%token LET BIND ENDLET
+%token IF THEN ELSE ENDIF
+%token MATCH WITH PIPE FAT_ARROW ENDMATCH
 
 // associativity and precedences
 %left AND OR
@@ -67,16 +61,16 @@ Statement: LetStatement { $1 }
          | IfThenElseStatement { $1 }
          | MatchStatement { $1 }
 
-LetStatement: LET SYMBOL BIND BLOCKBEGIN Statements BLOCKEND { Let ($2, $5) }
+LetStatement: LET SYMBOL BIND BLOCKBEGIN Statements BLOCKEND ENDLET { Let ($2, $5) }
 
 ReturnStatement: Expression { Return $1 }
 
-IfThenElseStatement: IF Expression THEN BLOCKBEGIN Statements BLOCKEND { IfThenElse ($2, $5, []) }
+IfThenElseStatement: IF Expression THEN BLOCKBEGIN Statements BLOCKEND ENDIF { IfThenElse ($2, $5, []) }
                    | IF Expression THEN BLOCKBEGIN Statements BLOCKEND 
-                     ELSE BLOCKBEGIN Statements BLOCKEND { IfThenElse ($2, $5, $9) }
+                     ELSE BLOCKBEGIN Statements BLOCKEND ENDIF { IfThenElse ($2, $5, $9) }
 
 MatchStatement: MATCH Expression WITH
-                BLOCKSEP MatchCases { Match ($2, $5) }
+                BLOCKSEP MatchCases ENDMATCH { Match ($2, $5) }
 
 MatchCases: MatchCase { [$1] }
           | MatchCases BLOCKSEP MatchCase { $1 @ [ $3 ] }
