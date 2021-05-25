@@ -1,3 +1,7 @@
 module toto
-if a == 10 then a (a()) 3
 
+if a == 10 then a(a(), 3) else 42
+
+match a + b with
+| 42 => toto()
+| 666 => 666

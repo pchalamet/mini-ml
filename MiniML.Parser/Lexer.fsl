@@ -20,6 +20,8 @@ rule token = parse
     | "if"       { IF }
     | "then"     { THEN }
     | "else"     { ELSE }
+    | "match"    { MATCH }
+    | "with"     { WITH }
     | return     { RETURN }
     | number     { NUMBER (lexeme lexbuf |> decimal) }
     | symbol     { SYMBOL (lexeme lexbuf |> string) }
@@ -40,6 +42,8 @@ rule token = parse
     | ')'        { RPAREN }
     | ','        { COMMA }
     | ';'        { SEMICOLON }
+    | '|'        { PIPE }
+    | "=>"       { FAT_ARROW }
     | whitespace { token lexbuf }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
     | eof        { EOF }

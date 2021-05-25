@@ -19,13 +19,14 @@ type Expression =
     | Number of decimal
     | Symbol of string
     | Function of Function * Expression * Expression
-    | FunctionCall of string * (Expression list)
+    | FunctionCall of string * Expression list
     | PartialFunctionCall of string * (Expression list)
 
 type Statement =
     | Return of Expression
     | Let of string * Statements
     | IfThenElse of Expression * Statements * Statements
+    | Match of Expression * (Expression * Statement list) list
 and Statements = Statement list
 
 type File =

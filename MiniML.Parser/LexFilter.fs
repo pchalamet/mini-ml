@@ -9,7 +9,8 @@ type ParseException(message, position: Position) =
 
 let startBlockMarkers = Set [ Parser.token.BIND
                               Parser.token.THEN
-                              Parser.token.ELSE ]
+                              Parser.token.ELSE
+                              Parser.token.FAT_ARROW ]
 
 type LexFilter() = class end
 with
