@@ -3,28 +3,20 @@
 
 open MiniML.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
+open MiniML.LexerHelpers
  
 let lexeme = LexBuffer<_>.LexemeString
 }
 
-let module = "module"
-let return = "return"
-let symbol = ['a'-'z']+
-let number = '-'? ['0'-'9']+('.'['0'-'9']+)?
-let whitespace = ' ' | '\t'
-let newline    = '\n' | '\r' '\n'
+let integer = ['1'-'9'] ['0'-'9']* | '-'? '0'*
+let pointfloat = '-'? ['0'-'9']* '.' ['0'-'9']* | ['0'-'9']+ '.'
+let newline = [' ' '\t']* ['\r' '\n']
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
+let string_char = [^ '\n' '\'' '"' '\\'] | '\\' _
+let whitespace = [' ' '\t']+
+let ws_comment = [' ' '\t']+'#'
 
-rule token = parse
-    | module     { MODULE }
-    | "let"      { LET }
-    | "if"       { IF }
-    | "then"     { THEN }
-    | "else"     { ELSE }
-    | "match"    { MATCH }
-    | "with"     { WITH }
-    | return     { RETURN }
-    | number     { NUMBER (lexeme lexbuf |> decimal) }
-    | symbol     { SYMBOL (lexeme lexbuf |> string) }
+rule read_one = parse
     | "=="       { EQUAL }
     | "<>"       { NOT_EQUAL }
     | '<'        { LT }
@@ -38,13 +30,17 @@ rule token = parse
     | '-'        { MINUS }
     | '*'        { TIMES }
     | '/'        { DIVIDE }
-    | '('        { LPAREN }
-    | ')'        { RPAREN }
+    | '('        { on_enter_bracket LPAREN }
+    | ')'        { on_leave_bracket RPAREN }
     | ','        { COMMA }
     | ';'        { SEMICOLON }
     | '|'        { PIPE }
     | "=>"       { FAT_ARROW }
-    | whitespace { token lexbuf }
-    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
-    | eof        { EOF }
+
+    | integer    { NUMBER (lexeme lexbuf |> decimal) }
+    | newline    { on_newline read_one lexbuf }
+    | id         { on_id lexbuf }
+    | whitespace { on_whitespace read_one lexbuf }
+    | eof        { on_eof() }
     | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+

@@ -3,7 +3,7 @@ build:
 	dotnet build
 
 run:
-	dotnet run -p MiniML.Compiler
+	dotnet run --project MiniML.Compiler
 	
 test:
 	dotnet test

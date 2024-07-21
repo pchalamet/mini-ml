@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AbstractSyntaxTree.fs" />
@@ -18,11 +18,12 @@
 
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
+    <Compile Include="LexerHelpers.fs" />
     <Compile Include="Lexer.fs" />
-    <Compile Include="LexFilter.fs" />
+    <!-- <Compile Include="LexFilter.fs" /> -->
     <Compile Include="FrontEnd.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FsLexYacc" Version="10.2.0" />
+    <PackageReference Include="FsLexYacc" Version="11.3.0" />
   </ItemGroup>
 </Project>

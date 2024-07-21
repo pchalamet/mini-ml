@@ -28,7 +28,7 @@ let ``multiple statements in same block must be aligned`` () =
 let a = 42
  let b = 666"""
 
-    (fun () -> MiniML.FrontEnd.parse file |> ignore) |> should throw typeof<MiniML.LexFilter.ParseException>
+    (fun () -> MiniML.FrontEnd.parse file |> ignore) |> should throw typeof<MiniML.LexerHelpers.ParseException>
 
 [<Test>]
 let ``if then else with single block is valid``() =
@@ -88,7 +88,7 @@ if a == 10 then
   else 10
 """
 
-    (fun () -> file |> MiniML.FrontEnd.parse |> ignore) |> should throw typeof<MiniML.LexFilter.ParseException>
+    (fun () -> file |> MiniML.FrontEnd.parse |> ignore) |> should throw typeof<MiniML.LexerHelpers.ParseException>
 
 
 [<Test>]
@@ -100,4 +100,4 @@ if a == 10 then
       else 10
 """
 
-    (fun () -> file |> MiniML.FrontEnd.parse |> ignore) |> should throw typeof<MiniML.LexFilter.ParseException>
+    (fun () -> file |> MiniML.FrontEnd.parse |> ignore) |> should throw typeof<MiniML.LexerHelpers.ParseException>
