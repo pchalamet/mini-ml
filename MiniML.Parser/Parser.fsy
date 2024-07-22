@@ -45,48 +45,29 @@ let debugPrint s = ignore s
 %% 
 
 File:
-    Module NEWLINE
+    MODULE ID NEWLINE
     Statements
     EOF
-        { Module ($1, $3) }
+        { Module ($2, $4) }
 
-Module:
-    MODULE ID
-        { $2 }
+Statements:
+    Statement { [$1] }
+    | Statements NEWLINE Statement { $1 @ [$3] }
 
 Statement:
     LetStatement
         { debugPrint $"let {$1}"; $1 }
 
-    | ReturnStatement
-        { debugPrint $"return {$1}"; $1 }
+    | ExpressionStatement
+        { debugPrint $"expression {$1}"; $1 }
 
-    | IfThenElseStatement
+    | IfStatement
         { debugPrint $"if {$1}"; $1 }
 
     | MatchStatement
         { debugPrint $"match {$1}"; $1 }
 
-Statements:
-    Statement NEWLINE
-        { debugPrint $"single statement {$1}"; [ $1 ] }
-
-    | Statements Statement
-        { debugPrint $"multiple statements {$1 @ [ $2 ]}"; $1 @ [ $2 ] }
-
-BlockStatements:
-    NEWLINE INDENT Statements DEDENT
-        { debugPrint $"multiple block statements"; $3 }
-
-LetStatement:
-    LET ID BIND BlockStatements
-        { Let ($2, $4) }
-
-ReturnStatement:
-    Expression
-        { Return $1 }
-
-IfThenElseStatement:
+IfStatement:
     | IF Expression THEN BlockStatements Else
         { debugPrint $"IfThenElse"; IfThenElse ($2, $4, $5) }
 
@@ -96,6 +77,19 @@ Else:
 
     | ELSE BlockStatements
         { $2 }
+
+BlockStatements:
+    Statement { [$1] }
+    | NEWLINE INDENT Statements { $3 }
+ 
+LetStatement:
+    LET ID BIND BlockStatements
+        { Let ($2, $4) }
+
+ExpressionStatement:
+    Expression
+        { Return $1 }
+
 
 MatchStatement:
     MATCH Expression WITH MatchCases

@@ -43,21 +43,31 @@ let rec read read_one (lexbuf: LexBuf) =
         else
             last_token_was_newline <- true
             NEWLINE
+    | EOF ->
+        if 0 < indent_levels.Head then
+            indent_levels <- indent_levels.Tail
+            read_queue <- ret_token :: read_queue
+            DEDENT
+        else
+            ret_token
     | _ ->
+        // NEWLINE has been emitted before and current token is not NEWLINE
         if last_token_was_newline then
-            last_token_was_newline <- false
+            // shall we INDENT ?
             if indent_levels.Head < lexbuf.StartPos.Column then
                 indent_levels <- lexbuf.StartPos.Column :: indent_levels
                 read_queue <- ret_token :: read_queue
+                last_token_was_newline <- false
                 INDENT
+            // shall we DEDENT ?
             elif lexbuf.StartPos.Column < indent_levels.Head then
                 indent_levels <- indent_levels.Tail
-                read_queue <- NEWLINE :: ret_token :: read_queue
-                while lexbuf.StartPos.Column < indent_levels.Head do
-                    indent_levels <- indent_levels.Tail
-                    read_queue <- DEDENT :: read_queue
+                read_queue <- ret_token :: read_queue
                 DEDENT
+            // same indent emit token
             else
+                last_token_was_newline <- false
                 ret_token
+        // same line emit token
         else
             ret_token
