@@ -47,76 +47,139 @@ let debugPrint s = ignore s
 File:
     Module NEWLINE
     Statements
-    EOF { Module ($1, $3) }
+    EOF
+        { Module ($1, $3) }
 
 Module:
-    MODULE ID { $2 }
-
-Statements:
-    Statement { debugPrint $"single statement {$1}"; [ $1 ] }
-    | Statements NEWLINE Statement { debugPrint $"multiple statements {$1 @ [ $3 ]}"; $1 @ [ $3 ] }
+    MODULE ID
+        { $2 }
 
 Statement:
-    LetStatement { debugPrint $"let {$1}"; $1 }
-    | ReturnStatement { debugPrint $"return {$1}"; $1 }
-    | IfThenElseStatement { debugPrint $"if {$1}"; $1 }
-    | MatchStatement { debugPrint $"match {$1}"; $1 }
+    LetStatement
+        { debugPrint $"let {$1}"; $1 }
+
+    | ReturnStatement
+        { debugPrint $"return {$1}"; $1 }
+
+    | IfThenElseStatement
+        { debugPrint $"if {$1}"; $1 }
+
+    | MatchStatement
+        { debugPrint $"match {$1}"; $1 }
+
+Statements:
+    Statement NEWLINE
+        { debugPrint $"single statement {$1}"; [ $1 ] }
+
+    | Statements Statement
+        { debugPrint $"multiple statements {$1 @ [ $2 ]}"; $1 @ [ $2 ] }
 
 BlockStatements:
-    Statement { [ $1 ] }
-    | NEWLINE INDENT Statements NEWLINE DEDENT { $3 }
+    NEWLINE INDENT Statements DEDENT
+        { debugPrint $"multiple block statements"; $3 }
 
 LetStatement:
-    LET ID BIND BlockStatements { Let ($2, $4) }
+    LET ID BIND BlockStatements
+        { Let ($2, $4) }
 
-ReturnStatement: Expression { Return $1 }
+ReturnStatement:
+    Expression
+        { Return $1 }
 
 IfThenElseStatement:
-    IF Expression THEN BlockStatements
-    { IfThenElse ($2, $4, []) }
+    | IF Expression THEN BlockStatements Else
+        { debugPrint $"IfThenElse"; IfThenElse ($2, $4, $5) }
 
-    | IF Expression THEN BlockStatements
-      ELSE BlockStatements
-    { IfThenElse ($2, $4, $6) }
+Else:
+    /* empty */
+        { [] }
+
+    | ELSE BlockStatements
+        { $2 }
 
 MatchStatement:
-    MATCH Expression WITH MatchCases { Match ($2, $4) }
+    MATCH Expression WITH MatchCases
+        { Match ($2, $4) }
 
 MatchCases:
-    MatchCase { [$1] }
-    | MatchCases MatchCase { $1 @ [ $2 ] }
+    MatchCase
+        { [$1] }
+    
+    | MatchCases MatchCase
+        { $1 @ [ $2 ] }
 
 MatchCase:
-    PIPE Expression FAT_ARROW BlockStatements { $2, $4 }
+    PIPE Expression FAT_ARROW BlockStatements
+        { $2, $4 }
 
 Expression:
-    NUMBER                  { Number $1 }
-    | ID                    { Symbol $1 }
-    | Expression PLUS Expression          { Function (Plus, $1, $3) } 
-    | Expression MINUS Expression         { Function (Minus, $1, $3) } 
-    | Expression TIMES Expression         { Function (Times, $1, $3) } 
-    | Expression DIVIDE Expression        { Function (Divide, $1, $3) }
+    NUMBER
+        { Number $1 }
+    
+    | ID
+        { Symbol $1 }
+    
+    | Expression PLUS Expression
+        { Function (Plus, $1, $3) } 
+    
+    | Expression MINUS Expression
+        { Function (Minus, $1, $3) }
 
-    | Expression EQUAL Expression        { Function (Equal, $1, $3) }
-    | Expression NOT_EQUAL Expression        { Function (NotEqual, $1, $3) }
-    | Expression LT Expression        { Function (LowerThan, $1, $3) }
-    | Expression LT_EQUAL Expression        { Function (LowerThanOrEqual, $1, $3) }
-    | Expression GT Expression        { Function (GreaterThan, $1, $3) }
-    | Expression GT_EQUAL Expression        { Function (GreaterThanOrEqual, $1, $3) }
+    | Expression TIMES Expression
+        { Function (Times, $1, $3) }
 
-    | Expression AND Expression        { Function (And, $1, $3) }
-    | Expression OR Expression        { Function (Or, $1, $3) }
+    | Expression DIVIDE Expression
+        { Function (Divide, $1, $3) }
 
-    | LPAREN Expression RPAREN      { $2 }
-    | ID LPAREN CallTupleArgs RPAREN { FunctionCall ($1, $3) }
+    | Expression EQUAL Expression
+        { Function (Equal, $1, $3) }
+
+    | Expression NOT_EQUAL Expression
+        { Function (NotEqual, $1, $3) }
+
+    | Expression LT Expression
+        { Function (LowerThan, $1, $3) }
+
+    | Expression LT_EQUAL Expression
+        { Function (LowerThanOrEqual, $1, $3) }
+
+    | Expression GT Expression
+        { Function (GreaterThan, $1, $3) }
+
+    | Expression GT_EQUAL Expression
+        { Function (GreaterThanOrEqual, $1, $3) }
+
+    | Expression AND Expression
+        { Function (And, $1, $3) }
+
+    | Expression OR Expression
+        { Function (Or, $1, $3) }
+
+    | LPAREN Expression RPAREN
+        { $2 }
+
+    | ID LPAREN CallTupleArgs RPAREN
+        { FunctionCall ($1, $3) }
 
         //   | SYMBOL CallPartialArgs { PartialFunctionCall ($1, $2) }
 
-CallTupleArgs: { [] }
-        | CallArgs { $1 }
+CallTupleArgs:
+    /* empty */
+        { [] }
 
-CallArgs: Expression { [$1] }
-        | CallArgs COMMA Expression { $1 @ [ $3 ] }
+    | CallArgs
+        { $1 }
 
-CallPartialArgs: Expression { [$1] }
-               | CallPartialArgs Expression { $1 @ [ $2 ] }
+CallArgs:
+    Expression
+        { [$1] }
+    
+    | CallArgs COMMA Expression
+        { $1 @ [ $3 ] }
+
+CallPartialArgs:
+    Expression
+        { [$1] }
+    
+    | CallPartialArgs Expression
+        { $1 @ [ $2 ] }

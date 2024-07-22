@@ -11,5 +11,5 @@ let inline private dumpLexer lexer (lexbuff: LexBuffer<char>) =
 
 let parse txt =
     let lexbuf = LexBuffer<_>.FromString txt
-    let lexer = LexerHelpers.read Lexer.read_one
+    let lexer = LexFilter.read Lexer.read_one
     Parser.File (dumpLexer lexer) lexbuf

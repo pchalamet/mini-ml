@@ -3,8 +3,7 @@
 
 open MiniML.Parser  // we need the terminal tokens from the Parser
 open FSharp.Text.Lexing
-open MiniML.LexerHelpers
- 
+
 let lexeme = LexBuffer<_>.LexemeString
 }
 
@@ -30,17 +29,21 @@ rule read_one = parse
     | '-'        { MINUS }
     | '*'        { TIMES }
     | '/'        { DIVIDE }
-    | '('        { on_enter_bracket LPAREN }
-    | ')'        { on_leave_bracket RPAREN }
+    | '('        { LPAREN }
+    | ')'        { RPAREN }
     | ','        { COMMA }
     | ';'        { SEMICOLON }
     | '|'        { PIPE }
     | "=>"       { FAT_ARROW }
 
-    | integer    { NUMBER (lexeme lexbuf |> decimal) }
-    | newline    { on_newline read_one lexbuf }
-    | id         { on_id lexbuf }
-    | whitespace { on_whitespace read_one lexbuf }
-    | eof        { on_eof() }
-    | _          { failwithf "unrecognized input: '%s'" <| lexeme lexbuf }
+    | "module"   { MODULE }
+    | "if"       { IF }
+    | "then"     { THEN }
+    | "else"     { ELSE }
 
+    | integer    { lexbuf |> lexeme |> decimal |> NUMBER }
+    | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }
+    | id         { lexbuf |> lexeme |> ID }
+    | whitespace { read_one lexbuf }
+    | eof        { EOF }
+    | _          { failwithf $"unrecognized input: '{lexeme lexbuf}'" }
