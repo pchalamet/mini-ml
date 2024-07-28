@@ -7,8 +7,7 @@ let lexeme = LexBuffer<_>.LexemeString
 
 let mutable indent_levels = [ 0 ]
 let mutable read_queue = []
-let mutable last_token_was_newline = true
-
+let mutable last_token_was_newline = false
 
 let is_start_of_line (lexbuf: LexBuf) =
     lexbuf.StartPos.Column = 0
@@ -38,20 +37,18 @@ let rec read read_one (lexbuf: LexBuf) =
 
     match ret_token with
     | NEWLINE ->
-        if last_token_was_newline then
-            read read_one lexbuf
-        else
-            last_token_was_newline <- true
-            NEWLINE
+        last_token_was_newline <- true
+        read read_one lexbuf
     | EOF ->
         if 0 < indent_levels.Head then
             indent_levels <- indent_levels.Tail
-            read_queue <- ret_token :: read_queue
+            read_queue <- EOF :: read_queue
+            lexbuf.IsPastEndOfStream <- false
             DEDENT
         else
+            lexbuf.IsPastEndOfStream <- true
             ret_token
     | _ ->
-        // NEWLINE has been emitted before and current token is not NEWLINE
         if last_token_was_newline then
             // shall we INDENT ?
             if indent_levels.Head < lexbuf.StartPos.Column then
@@ -66,8 +63,9 @@ let rec read read_one (lexbuf: LexBuf) =
                 DEDENT
             // same indent emit token
             else
+                read_queue <- ret_token :: read_queue
                 last_token_was_newline <- false
-                ret_token
+                NEWLINE
         // same line emit token
         else
             ret_token

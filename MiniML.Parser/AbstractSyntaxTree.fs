@@ -26,7 +26,7 @@ type Statement =
     | Return of Expression
     | Let of string * Statements
     | IfThenElse of Expression * Statements * Statements
-    | Match of Expression * (Expression * Statement list) list
+    | Switch of Expression * (Expression * Statement list) list
 and Statements = Statement list
 
 type File =

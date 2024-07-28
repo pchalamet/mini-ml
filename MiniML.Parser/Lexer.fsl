@@ -33,6 +33,7 @@ rule read_one = parse
     | ')'        { RPAREN }
     | ','        { COMMA }
     | ';'        { SEMICOLON }
+    | ':'        { COLON }
     | '|'        { PIPE }
     | "=>"       { FAT_ARROW }
 
@@ -40,6 +41,8 @@ rule read_one = parse
     | "if"       { IF }
     | "then"     { THEN }
     | "else"     { ELSE }
+    | "match"    { MATCH }
+    | "with"     { WITH }
 
     | integer    { lexbuf |> lexeme |> decimal |> NUMBER }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }

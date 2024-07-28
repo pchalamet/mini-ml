@@ -18,7 +18,6 @@
 
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
-    <Compile Include="LexerHelpers.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="LexFilter.fs" />
     <Compile Include="FrontEnd.fs" />

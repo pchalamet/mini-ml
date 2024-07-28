@@ -15,7 +15,7 @@ let debugPrint s = ignore s
 %token DUMMY
 
 // terminal tokens
-%token COMMA SEMICOLON
+%token COMMA SEMICOLON COLON
 %token <decimal> NUMBER
 %token <string> ID
 %token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
@@ -64,7 +64,7 @@ Statement:
     | IfStatement
         { debugPrint $"if {$1}"; $1 }
 
-    | MatchStatement
+    | SwitchStatement
         { debugPrint $"match {$1}"; $1 }
 
 IfStatement:
@@ -75,12 +75,12 @@ Else:
     /* empty */
         { [] }
 
-    | ELSE BlockStatements
-        { $2 }
+    | NEWLINE ELSE BlockStatements
+        { $3 }
 
 BlockStatements:
     Statement { [$1] }
-    | NEWLINE INDENT Statements { $3 }
+    | INDENT Statements DEDENT { $2 }
  
 LetStatement:
     LET ID BIND BlockStatements
@@ -91,20 +91,20 @@ ExpressionStatement:
         { Return $1 }
 
 
-MatchStatement:
-    MATCH Expression WITH MatchCases
-        { Match ($2, $4) }
+SwitchStatement:
+    MATCH Expression WITH INDENT SwitchCases DEDENT
+        { Switch ($2, $5) }
 
-MatchCases:
-    MatchCase
+SwitchCases:
+    SwitchCase
         { [$1] }
     
-    | MatchCases MatchCase
-        { $1 @ [ $2 ] }
+    | SwitchCases NEWLINE SwitchCase
+        { $1 @ [ $3 ] }
 
-MatchCase:
-    PIPE Expression FAT_ARROW BlockStatements
-        { $2, $4 }
+SwitchCase:
+    Expression FAT_ARROW BlockStatements
+        { $1, $3 }
 
 Expression:
     NUMBER
