@@ -24,7 +24,6 @@ let debugPrint s = ignore s
 
 %token MODULE
 %token LET
-%token BIND
 %token RETURN
 
 %token IF THEN ELSE
@@ -73,7 +72,7 @@ BlockStatements:
     | INDENT Statements DEDENT { $2 }
  
 LetStatement:
-    | LET ID BIND BlockStatements { Let ($2, $4) }
+    | LET ID EQUAL BlockStatements { Let ($2, $4) }
 
 ExpressionStatement:
     | Expression { Return $1 }

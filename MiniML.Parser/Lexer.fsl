@@ -16,7 +16,7 @@ let whitespace = [' ' '\t']+
 let ws_comment = [' ' '\t']+'#'
 
 rule read_one = parse
-    | "=="       { EQUAL }
+    | "="       { EQUAL }
     | "<>"       { NOT_EQUAL }
     | '<'        { LT }
     | '>'        { GT }
@@ -24,7 +24,6 @@ rule read_one = parse
     | ">="       { GT_EQUAL }  
     | "&&"       { AND }
     | "||"       { OR }
-    | '='        { BIND }
     | '+'        { PLUS }
     | '-'        { MINUS }
     | '*'        { TIMES }
@@ -45,6 +44,7 @@ rule read_one = parse
     | "with"     { WITH }
     | "while"    { WHILE }
     | "do"       { DO }
+    | "let"      { LET }
 
     | integer    { lexbuf |> lexeme |> decimal |> NUMBER }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }
