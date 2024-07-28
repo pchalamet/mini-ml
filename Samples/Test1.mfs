@@ -1,8 +1,8 @@
 module toto
 
 
-if a == 10 then
-    10
+if a == 10 then     
+    10   
 else
     20
 

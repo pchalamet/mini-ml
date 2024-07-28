@@ -27,6 +27,7 @@ type Statement =
     | Let of string * Statements
     | IfThenElse of Expression * Statements * Statements
     | Match of Expression * (Expression * Statement list) list
+    | While of Expression * Statement list
 and Statements = Statement list
 
 type File =
