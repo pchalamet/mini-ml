@@ -10,7 +10,7 @@ match x with
     10 => 20
     20 => 40
 
-if b == 10 then
+while b == 10 do
     if a == 10 then
         10
     else
