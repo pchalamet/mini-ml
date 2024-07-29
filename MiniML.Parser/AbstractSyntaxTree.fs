@@ -23,10 +23,12 @@ type Binding =
 [<RequireQualifiedAccess>]
 type Expression = 
     | Number of decimal
+    | Bool of bool
+    | String of string
     | List of Expression list
     | Tuple of Expression list
     | Symbol of string
-    | Operator of Operator * Expression * Expression
+    | Operator of Operator * Expression list
     | Invoke of string * Expression list
     | Function of Binding * Statements
     | IfThenElse of Expression * Statements * Statements

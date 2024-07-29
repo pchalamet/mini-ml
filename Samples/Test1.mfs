@@ -24,8 +24,9 @@ let c=
 let d =
     toto(42,53,d)
 
+# for
 for i in 42 do
     fun i -> toto(i)
-    (1, 2, 3+4)
-    (1)
-    [1, 2, 4]
+    (1, 2, 3+4) # tuple
+    (!false) # expression
+    [1, 2, "4"] # list 

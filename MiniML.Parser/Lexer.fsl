@@ -11,9 +11,9 @@ let integer = ['1'-'9'] ['0'-'9']* | '-'? '0'*
 let pointfloat = '-'? ['0'-'9']* '.' ['0'-'9']* | ['0'-'9']+ '.'
 let newline = [' ' '\t']* ['\r' '\n']
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
-let string_char = [^ '\n' '\'' '"' '\\'] | '\\' _
 let whitespace = [' ' '\t']+
 let ws_comment = [' ' '\t']+'#'
+let quotedString = '\"' [^'\"']+ '\"'
 
 rule read_one = parse
     | "="       { EQUAL }
@@ -24,6 +24,7 @@ rule read_one = parse
     | ">="       { GT_EQUAL }  
     | "&&"       { AND }
     | "||"       { OR }
+    | "!"        { NOT }
     | '+'        { PLUS }
     | '-'        { MINUS }
     | '*'        { TIMES }
@@ -51,6 +52,15 @@ rule read_one = parse
     | "for"      { FOR }
     | "in"       { IN }
     | "fun"      { FUN }
+    | "true"     { BOOL true }
+    | "false"    { BOOL false }
+
+    | "#" { singleLineComment lexbuf }
+    | "//" { singleLineComment lexbuf }
+
+    | quotedString { 
+        let s = lexeme lexbuf |> string
+        STRING (s.Substring(1, s.Length-2)) }
 
     | integer    { lexbuf |> lexeme |> decimal |> NUMBER }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }
@@ -58,3 +68,8 @@ rule read_one = parse
     | whitespace { read_one lexbuf }
     | eof        { EOF }
     | _          { failwithf $"unrecognized input: '{lexeme lexbuf}'" }
+
+and singleLineComment = parse
+    | newline { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }
+    | eof { EOF }
+    | _ { singleLineComment lexbuf }
