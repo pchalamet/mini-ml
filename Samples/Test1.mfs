@@ -9,11 +9,13 @@ let c =
         20
 
 match x with
-    10 => 20
-    20 => 40
+    10 -> 20
+    20 -> 40
 
 while b = 10 do
     if a = 10 then
         10
     else
         20
+
+let c=42

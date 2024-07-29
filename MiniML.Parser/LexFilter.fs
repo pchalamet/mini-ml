@@ -3,14 +3,9 @@ open FSharp.Text.Lexing
 open MiniML.Parser
 
 type LexBuf = LexBuffer<char>
-let lexeme = LexBuffer<_>.LexemeString
-
 let mutable indent_levels = [ 0 ]
 let mutable read_queue = []
 let mutable last_token_was_newline = false
-
-let is_start_of_line (lexbuf: LexBuf) =
-    lexbuf.StartPos.Column = 0
 
 let pop_and_count n =
     let rec iter acc =

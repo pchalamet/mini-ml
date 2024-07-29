@@ -35,6 +35,7 @@ rule read_one = parse
     | ':'        { COLON }
     | '|'        { PIPE }
     | "=>"       { FAT_ARROW }
+    | "->"       { LIGHT_ARROW }
 
     | "module"   { MODULE }
     | "if"       { IF }

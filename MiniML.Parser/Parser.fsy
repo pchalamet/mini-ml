@@ -11,8 +11,6 @@ let debugPrint s = ignore s
 %}
  
 %start File
- 
-%token DUMMY
 
 // terminal tokens
 %token COMMA SEMICOLON COLON PIPE
@@ -27,7 +25,7 @@ let debugPrint s = ignore s
 %token RETURN
 
 %token IF THEN ELSE
-%token MATCH WITH FAT_ARROW
+%token MATCH WITH FAT_ARROW LIGHT_ARROW
 %token WHILE DO
 
 %token INDENT DEDENT NEWLINE
@@ -86,7 +84,7 @@ MatchCases:
     | MatchCases NEWLINE MatchCase { $1 @ [ $3 ] }
 
 MatchCase:
-    | Expression FAT_ARROW BlockStatements { $1, $3 }
+    | Expression LIGHT_ARROW BlockStatements { $1, $3 }
 
 WhileStatement:
     | WHILE Expression DO BlockStatements { While ($2, $4) }
