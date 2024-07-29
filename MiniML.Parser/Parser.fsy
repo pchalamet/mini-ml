@@ -25,7 +25,6 @@ let debugPrint s = ignore s
 %token MODULE
 %token LET
 %token RETURN
-
 %token IF THEN ELSE
 %token MATCH WITH FAT_ARROW LIGHT_ARROW
 %token WHILE DO
@@ -35,10 +34,14 @@ let debugPrint s = ignore s
 %token INDENT DEDENT NEWLINE
 
 // associativity and precedences
+%left INDENT DEDENT NEWLINE
+%right LPAREN LSQBRACKET
+%left RPAREN RSQBRACKET
+%left EQUAL NOT_EQUAL
+%left LT GT LT_EQUAL GT_EQUAL
+%left TIMES DIVIDE PLUS MINUS 
 %left AND OR
-%left PLUS MINUS 
-%left TIMES DIVIDE
-%left EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
+%left COLON
 
 
 // return type of Expr
@@ -116,7 +119,7 @@ Expression:
     | Expression AND Expression { Expression.Operator (Operator.And, $1, $3) }
     | Expression OR Expression { Expression.Operator (Operator.Or, $1, $3) }
     | LPAREN Expression RPAREN { $2 }
-    | ID Tuple { Expression.Invoke ($1, $2) }
+    | ID FunctionArgs { Expression.Invoke ($1, $2) }
     | FUN Binding LIGHT_ARROW BlockStatements { Expression.Function ($2, $4) }
     | Tuple { Expression.Tuple $1 }
     | List { Expression.List $1 }
@@ -125,6 +128,13 @@ List:
     LSQBRACKET Values RSQBRACKET { $2 }
 
 Tuple:
+    LPAREN TupleValues RPAREN { $2 }
+
+TupleValues:
+    | Expression COMMA Expression { [$1; $3] }
+    | TupleValues COMMA Expression { $1 @ [ $3 ] }
+
+FunctionArgs:
     LPAREN Values RPAREN { $2 }
 
 Values:

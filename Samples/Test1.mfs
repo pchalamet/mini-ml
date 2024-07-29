@@ -27,4 +27,5 @@ let d =
 for i in 42 do
     fun i -> toto(i)
     (1, 2, 3+4)
+    (1)
     [1, 2, 4]
