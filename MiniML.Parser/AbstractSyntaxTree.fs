@@ -29,12 +29,12 @@ type Expression =
     | Operator of Operator * Expression * Expression
     | Invoke of string * Expression list
     | Function of Binding * Statements
+    | IfThenElse of Expression * Statements * Statements
+    | Match of Expression * (Expression * Statement list) list
 
 and [<RequireQualifiedAccess>] Statement =
     | Return of Expression
     | Let of Binding * Statements
-    | IfThenElse of Expression * Statements * Statements
-    | Match of Expression * (Expression * Statement list) list
     | While of Expression * Statement list
     | For of Binding * Expression * Statement list
 
