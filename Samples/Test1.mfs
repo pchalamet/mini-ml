@@ -19,3 +19,6 @@ while b = 10 do
         20
 
 let c=42
+
+let d = toto(42,53,d)
+
