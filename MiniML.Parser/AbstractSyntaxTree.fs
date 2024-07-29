@@ -29,6 +29,7 @@ type Expression =
     | Operator of Operator * Expression * Expression
     | Invoke of string * Expression list
     | Function of Binding * Statements
+
 and [<RequireQualifiedAccess>] Statement =
     | Return of Expression
     | Let of Binding * Statements
@@ -36,6 +37,7 @@ and [<RequireQualifiedAccess>] Statement =
     | Match of Expression * (Expression * Statement list) list
     | While of Expression * Statement list
     | For of Binding * Expression * Statement list
+
 and Statements = Statement list
 
 [<RequireQualifiedAccess>]
