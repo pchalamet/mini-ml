@@ -48,6 +48,7 @@ rule read_one = parse
     | "let"      { LET }
     | "for"      { FOR }
     | "in"       { IN }
+    | "fun"      { FUN }
 
     | integer    { lexbuf |> lexeme |> decimal |> NUMBER }
     | newline    { lexbuf.EndPos <- lexbuf.EndPos.NextLine; NEWLINE }

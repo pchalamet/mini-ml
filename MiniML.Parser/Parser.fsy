@@ -28,6 +28,7 @@ let debugPrint s = ignore s
 %token MATCH WITH FAT_ARROW LIGHT_ARROW
 %token WHILE DO
 %token FOR IN
+%token FUN
 
 %token INDENT DEDENT NEWLINE
 
@@ -100,20 +101,21 @@ Binding:
 Expression:
     | NUMBER { Expression.Number $1 }
     | ID { Expression.Symbol $1 }
-    | Expression PLUS Expression { Expression.Function (Function.Plus, $1, $3) }
-    | Expression MINUS Expression { Expression.Function (Function.Minus, $1, $3) }
-    | Expression TIMES Expression { Expression.Function (Function.Times, $1, $3) }
-    | Expression DIVIDE Expression { Expression.Function (Function.Divide, $1, $3) }
-    | Expression EQUAL Expression { Expression.Function (Function.Equal, $1, $3) }
-    | Expression NOT_EQUAL Expression { Expression.Function (Function.NotEqual, $1, $3) }
-    | Expression LT Expression { Expression.Function (Function.LowerThan, $1, $3) }
-    | Expression LT_EQUAL Expression { Expression.Function (Function.LowerThanOrEqual, $1, $3) }
-    | Expression GT Expression { Expression.Function (Function.GreaterThan, $1, $3) }
-    | Expression GT_EQUAL Expression { Expression.Function (Function.GreaterThanOrEqual, $1, $3) }
-    | Expression AND Expression { Expression.Function (Function.And, $1, $3) }
-    | Expression OR Expression { Expression.Function (Function.Or, $1, $3) }
+    | Expression PLUS Expression { Expression.Operator (Operator.Plus, $1, $3) }
+    | Expression MINUS Expression { Expression.Operator (Operator.Minus, $1, $3) }
+    | Expression TIMES Expression { Expression.Operator (Operator.Times, $1, $3) }
+    | Expression DIVIDE Expression { Expression.Operator (Operator.Divide, $1, $3) }
+    | Expression EQUAL Expression { Expression.Operator (Operator.Equal, $1, $3) }
+    | Expression NOT_EQUAL Expression { Expression.Operator (Operator.NotEqual, $1, $3) }
+    | Expression LT Expression { Expression.Operator (Operator.LowerThan, $1, $3) }
+    | Expression LT_EQUAL Expression { Expression.Operator (Operator.LowerThanOrEqual, $1, $3) }
+    | Expression GT Expression { Expression.Operator (Operator.GreaterThan, $1, $3) }
+    | Expression GT_EQUAL Expression { Expression.Operator (Operator.GreaterThanOrEqual, $1, $3) }
+    | Expression AND Expression { Expression.Operator (Operator.And, $1, $3) }
+    | Expression OR Expression { Expression.Operator (Operator.Or, $1, $3) }
     | LPAREN Expression RPAREN { $2 }
-    | ID LPAREN CallTupleArgs RPAREN { Expression.FunctionCall ($1, $3) }
+    | ID LPAREN CallTupleArgs RPAREN { Expression.Invoke ($1, $3) }
+    | FUN Binding LIGHT_ARROW BlockStatements { Expression.Function ($2, $4) }
 
 CallTupleArgs:
     | /* empty */ { [] }

@@ -25,4 +25,4 @@ let d =
     toto(42,53,d)
 
 for i in 42 do
-    toto(i)
+    fun i -> toto(i)
