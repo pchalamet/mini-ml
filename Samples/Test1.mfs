@@ -2,10 +2,11 @@ module toto
 
 let b = 20
 
-if a = 10 then     
-    10   
-else
-    20
+let c =
+    if a = 10 then
+        10
+    else
+        20
 
 match x with
     10 => 20
