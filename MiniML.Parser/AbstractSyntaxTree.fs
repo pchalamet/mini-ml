@@ -23,23 +23,20 @@ type Binding =
 [<RequireQualifiedAccess>]
 type Expression = 
     | Number of decimal
+    | List of Expression list
+    | Tuple of Expression list
     | Symbol of string
     | Operator of Operator * Expression * Expression
     | Invoke of string * Expression list
     | Function of Binding * Statements
-    | Tuple of Expression list
-    | List of Expression list
-and
-    [<RequireQualifiedAccess>] 
-    Statement =
+and [<RequireQualifiedAccess>] Statement =
     | Return of Expression
     | Let of Binding * Statements
     | IfThenElse of Expression * Statements * Statements
     | Match of Expression * (Expression * Statement list) list
     | While of Expression * Statement list
     | For of Binding * Expression * Statement list
-and
-    Statements = Statement list
+and Statements = Statement list
 
 [<RequireQualifiedAccess>]
 type File =
