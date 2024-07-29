@@ -16,7 +16,9 @@ let debugPrint s = ignore s
 %token COMMA SEMICOLON COLON PIPE
 %token <decimal> NUMBER
 %token <string> ID
-%token PLUS MINUS TIMES DIVIDE LPAREN RPAREN EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
+%token LPAREN RPAREN 
+%token LSQBRACKET RSQBRACKET
+%token PLUS MINUS TIMES DIVIDE EQUAL NOT_EQUAL LT GT LT_EQUAL GT_EQUAL
 %token AND OR
 %token EOF
 
@@ -114,13 +116,18 @@ Expression:
     | Expression AND Expression { Expression.Operator (Operator.And, $1, $3) }
     | Expression OR Expression { Expression.Operator (Operator.Or, $1, $3) }
     | LPAREN Expression RPAREN { $2 }
-    | ID LPAREN CallTupleArgs RPAREN { Expression.Invoke ($1, $3) }
+    | ID Tuple { Expression.Invoke ($1, $2) }
     | FUN Binding LIGHT_ARROW BlockStatements { Expression.Function ($2, $4) }
+    | Tuple { Expression.Tuple $1 }
+    | List { Expression.List $1 }
 
-CallTupleArgs:
+List:
+    LSQBRACKET Values RSQBRACKET { $2 }
+
+Tuple:
+    LPAREN Values RPAREN { $2 }
+
+Values:
     | /* empty */ { [] }
-    | CallArgs { $1 }
-
-CallArgs:
     | Expression { [$1] }
-    | CallArgs COMMA Expression { $1 @ [ $3 ] }
+    | Values COMMA Expression { $1 @ [ $3 ] }

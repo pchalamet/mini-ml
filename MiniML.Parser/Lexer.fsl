@@ -30,6 +30,8 @@ rule read_one = parse
     | '/'        { DIVIDE }
     | '('        { LPAREN }
     | ')'        { RPAREN }
+    | '['        { LSQBRACKET }
+    | ']'        { RSQBRACKET }
     | ','        { COMMA }
     | ';'        { SEMICOLON }
     | ':'        { COLON }

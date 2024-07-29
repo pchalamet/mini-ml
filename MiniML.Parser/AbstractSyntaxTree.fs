@@ -27,6 +27,8 @@ type Expression =
     | Operator of Operator * Expression * Expression
     | Invoke of string * Expression list
     | Function of Binding * Statements
+    | Tuple of Expression list
+    | List of Expression list
 and
     [<RequireQualifiedAccess>] 
     Statement =
