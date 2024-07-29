@@ -7,21 +7,6 @@ let mutable indent_levels = [ 0 ]
 let mutable read_queue = []
 let mutable last_token_was_newline = false
 
-let pop_and_count n =
-    let rec iter acc =
-        match indent_levels with
-        | head :: tail when head > n ->
-            indent_levels <- tail
-            iter (acc+1)
-        | head :: _ when head = n -> acc
-        | _ -> failwith "indent error"
-    iter 0
-
-let enqueue_dedents new_level =
-    let num_dedents = pop_and_count new_level
-    let dedents = List.init (num_dedents+1) (fun _ -> DEDENT)
-    dedents @ read_queue
-
 let rec read read_one (lexbuf: LexBuf) =
     let ret_token =
         match read_queue with
