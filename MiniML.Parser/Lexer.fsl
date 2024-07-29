@@ -55,7 +55,6 @@ rule read_one = parse
     | "true"     { BOOL true }
     | "false"    { BOOL false }
 
-    | "#" { singleLineComment lexbuf }
     | "//" { singleLineComment lexbuf }
 
     | quotedString { 
