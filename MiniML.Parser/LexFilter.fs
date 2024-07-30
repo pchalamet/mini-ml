@@ -10,7 +10,8 @@ let mutable last_token_was_newline = false
 let rec read read_one (lexbuf: LexBuf) =
     let ret_token =
         match read_queue with
-        | [] -> read_one lexbuf
+        | [] ->
+            read_one lexbuf
         | head :: tail ->
             read_queue <- tail
             head
